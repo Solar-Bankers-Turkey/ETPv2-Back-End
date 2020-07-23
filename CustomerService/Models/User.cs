@@ -7,9 +7,6 @@ namespace CustomerService.Models {
         [BsonRepresentation(BsonType.ObjectId)]
         public ObjectId Id { get; set; }
 
-        [BsonElement("userName")]
-        public string userName { get; set; }
-
         [BsonElement("passwordHash")]
         public string passwordHash { get; set; }
 
