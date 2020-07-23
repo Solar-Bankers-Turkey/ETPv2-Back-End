@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace CustomerService.Model {
+namespace CustomerService.Contexts {
     public class MongoUserDBContext : IMongoUserDBContext {
         private IMongoDatabase _db { get; set; }
         private MongoClient _mongoClient { get; set; }

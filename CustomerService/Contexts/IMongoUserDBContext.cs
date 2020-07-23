@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 
-namespace CustomerService.Model {
+namespace CustomerService.Contexts {
     public interface IMongoUserDBContext {
         IMongoCollection<User> GetCollection<User>(string name);
     }

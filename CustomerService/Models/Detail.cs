@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CustomerService.Model {
+namespace CustomerService.Models {
     public class Detail {
         public Address address { get; set; }
         public string phoneNo { get; set; }

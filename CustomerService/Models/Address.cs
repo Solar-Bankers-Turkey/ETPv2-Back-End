@@ -1,4 +1,4 @@
-﻿namespace CustomerService.Model {
+﻿namespace CustomerService.Models {
     public class Address {
         public string fullAddress { get; set; }
         public string city { get; set; }

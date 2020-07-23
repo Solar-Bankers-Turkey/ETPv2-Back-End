@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace CustomerService.Model {
+namespace CustomerService.Models {
     public class User {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
