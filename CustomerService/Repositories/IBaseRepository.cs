@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
 
 namespace CustomerService.Repositories {
@@ -7,8 +8,10 @@ namespace CustomerService.Repositories {
         void Create(TEntity obj);
         void Update(TEntity obj);
         void Delete(string id);
-        Task<TEntity> Get(string id);
-        Task<List<TEntity>> Get(FilterDefinition<TEntity> filter);
+        public Task<TEntity> GetFromID(string id);
+        public Task<TEntity> Query(IQueryCollection queries);
+        public Task<TEntity> GetAny(string key, string value);
+        // Task<List<TEntity>> Get(FilterDefinition<TEntity> filter);
         Task<IEnumerable<TEntity>> Get();
     }
 }
