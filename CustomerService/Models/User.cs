@@ -25,6 +25,9 @@ namespace CustomerService.Models {
         [BsonElement("customerType")]
         public string customerType { get; set; }
 
+        [BsonElement("verified")]
+        public bool verified { get; set; }
+
         [BsonElement("detail")]
         public Detail detail { get; set; }
     }
