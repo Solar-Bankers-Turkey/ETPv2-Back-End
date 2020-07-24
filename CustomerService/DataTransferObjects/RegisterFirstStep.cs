@@ -1,7 +1,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace CustomerService.DataTransferObjects {
-    public class RegisterObject {
+    public class RegisterFirstStep {
 
         [BsonElement("name")]
         public string name { get; set; }
@@ -12,7 +12,7 @@ namespace CustomerService.DataTransferObjects {
         [BsonElement("email")]
         public string email { get; set; }
 
-        [BsonElement("passwordHash")]
-        public string passwordHash { get; set; }
+        [BsonElement("password")]
+        public string password { get; set; }
     }
 }
