@@ -1,3 +1,5 @@
+using System;
+using AutoMapper;
 using CustomerService.Contexts;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -20,7 +22,7 @@ namespace CustomerService {
                 options.Connection = Configuration.GetSection("MongoSettings:Connection").Value;
                 options.DatabaseName = Configuration.GetSection("MongoSettings:DatabaseName").Value;
             });
-
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddTransient<IMongoUserDBContext, MongoUserDBContext>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddControllers();
