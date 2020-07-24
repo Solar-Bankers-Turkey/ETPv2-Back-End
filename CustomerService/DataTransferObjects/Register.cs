@@ -1,7 +1,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace CustomerService.DataTransferObjects {
-    public class RegisterFirstStep {
+    public class Register {
 
         [BsonElement("name")]
         public string name { get; set; }
