@@ -1,6 +1,7 @@
 using System;
 using AutoMapper;
 using CustomerService.Contexts;
+using CustomerService.Email;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,8 +24,9 @@ namespace CustomerService {
                 options.DatabaseName = Configuration.GetSection("MongoSettings:DatabaseName").Value;
             });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddTransient<IMongoUserDBContext, MongoUserDBContext>();
-            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddScoped<IMongoUserDBContext, MongoUserDBContext>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IEmailSender, EmailSender>();
             services.AddControllers();
         }
 
