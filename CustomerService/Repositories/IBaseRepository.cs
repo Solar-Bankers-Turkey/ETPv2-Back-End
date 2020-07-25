@@ -5,11 +5,10 @@ using MongoDB.Driver;
 
 namespace CustomerService.Repositories {
     public interface IBaseRepository<TEntity> where TEntity : class {
-        void Create(TEntity obj);
+        Task<string> Create(TEntity obj);
         void Update(TEntity obj);
         void Delete(string id);
-        public Task<TEntity> GetFromID(string id);
-        public Task<TEntity> Query(IQueryCollection queries);
+        public Task<IEnumerable<TEntity>> Query(IQueryCollection query);
         public Task<TEntity> GetAny(string key, string value);
         // Task<List<TEntity>> Get(FilterDefinition<TEntity> filter);
         Task<IEnumerable<TEntity>> Get();
