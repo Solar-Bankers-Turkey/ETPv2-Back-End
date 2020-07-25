@@ -19,7 +19,8 @@ namespace CustomerService.Controllers {
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private IEmailSender _emailSender;
-        public string mainUrl = "https://www.etp.solarbankers.org";
+        public string host = "https://localhost:5001";
+        // public string host = "https://www.etp.solarbankers.org";
 
         public CustomerController(IUserRepository customerRepository, IMapper mapper, IConfiguration config, IEmailSender emailSender) {
             _customerRepository = customerRepository;
@@ -28,11 +29,32 @@ namespace CustomerService.Controllers {
             _emailSender = emailSender;
         }
 
+        /// <summary>
+        /// register (first step) end-point.
+        /// </summary>
+        /// <remarks>
+        /// This is the first part of registration it can create email verification link.
+        ///
+        ///</remarks>
+        /// <returns>nothing</returns>
+        /// <response code="200">
+        /// 
+        /// Outcomes:
+        /// 
+        ///     if email does not exists in database it sends a verification email to the client,
+        /// 
+        ///     if email exists but not verified its sends a message and a link of verification,
+        /// 
+        ///     if email address is exists and verified redirects user to login screen
+        /// 
+        /// </response>
+        /// <response code="400">if registration body is not valid</response>
         [HttpPost]
         [Route("register")]
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<User>> register([FromBody] Register registerObject) {
+        [Produces("application/json")]
+        public async Task<ActionResult> register([FromBody] Register registerObject) {
             // check null object
             if (Utils.RepositoryUtils.isObjectEmpty<Register>(registerObject) || registerObject == null) {
                 return BadRequest();
@@ -40,7 +62,14 @@ namespace CustomerService.Controllers {
             // check already exists later
             var tempUser = await _customerRepository.GetAny("email", registerObject.email);
             if (tempUser != null) {
-                return Ok(new { error = "This email address already exists" });
+                if (tempUser.verified == true) {
+                    // ! redirect to sign in page
+                    return Ok(new { error = "This email address already exists" });
+                } else {
+                    // send verification link page
+                    var tempID = Utils.RepositoryUtils.getVal(tempUser, "Id");
+                    return Ok(new { error = "This email address already exists please verify your email", Link = $"{host}/api/users/verify?id={tempID}" });
+                }
             }
             var salt = _config.GetValue<string>("salt");
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(salt + registerObject.password);
@@ -59,7 +88,7 @@ namespace CustomerService.Controllers {
             // send mail for next step                    
             var To = registerObject.email;
             var Subject = "Verify your account";
-            var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{mainUrl}/api/users/verify?id={id}'>Verify My Account</a></b>";
+            var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/users/verify?id={id}'>Verify My Account</a></b>";
             _emailSender.Send(To, Subject, Body);
             return Ok();
         }
@@ -68,6 +97,7 @@ namespace CustomerService.Controllers {
         [Route("verify")]
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<IActionResult> verify([FromBody] Verify verifyObject) {
             var query = HttpContext.Request.Query;
             if (query.Count != 1) {
@@ -106,8 +136,33 @@ namespace CustomerService.Controllers {
             return Created("", user);
         }
 
+        /// <summary>
+        /// general user query end-point.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// /get{query}
+        /// 
+        /// {query}  value can be null.
+        /// 
+        /// if request passed with null {query} string it will return all users in data base
+        /// 
+        /// this for development and debugging purpose.
+        /// 
+        /// Sample request:
+        /// 
+        ///     host:port/api/users/get?name=emre
+        ///     host:port/api/users/get?email=emreocak@solarbankers.org
+        ///
+        /// </remarks>
+        /// <returns>users array</returns>
+        /// <response code="200">Returns the result of query as users model array format</response>
+        /// <response code="400">if query is not valid</response>
         [HttpGet]
         [Route("get")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<ActionResult<IEnumerable<User>>> get() {
             var query = HttpContext.Request.Query;
             if (query.Count == 0) {
@@ -128,6 +183,9 @@ namespace CustomerService.Controllers {
 
         [HttpGet]
         [Route("get/id/{id}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
         public async Task<ActionResult<User>> getWithId(string id) {
             var result = await _customerRepository.GetAny("id", id);
             return Ok(result);
@@ -135,6 +193,10 @@ namespace CustomerService.Controllers {
 
         [HttpGet]
         [Route("get/email/{email}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<ActionResult<User>> getWithEmail(string email) {
             var result = await _customerRepository.GetAny("email", email);
             return Ok(result);
@@ -142,17 +204,26 @@ namespace CustomerService.Controllers {
 
         [HttpDelete]
         [Route("delete/id/{id}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<ActionResult<User>> deleteWithId(string id) {
+            var result = await _customerRepository.GetAny("id", id);
             try {
                 _customerRepository.Delete(id);
             } catch (System.Exception) {
                 return StatusCode(500);
             }
-            return Ok();
+            return Ok(result);
         }
 
         [HttpDelete]
         [Route("delete/email/{email}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<ActionResult<User>> deleteWithEmail(string email) {
             var result = await _customerRepository.GetAny("email", email);
             if (result == null) {
@@ -164,29 +235,24 @@ namespace CustomerService.Controllers {
             } catch {
                 return StatusCode(500);
             }
-            return Ok();
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("exists")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [Produces("application/json")]
         public async Task<ActionResult<bool>> exists() {
             var query = HttpContext.Request.Query;
             if (query.Count == 0) {
-                return Ok(false);
+                return Ok(new { exists = false });
             }
             var result = await _customerRepository.Query(query);
             var exists = result != null;
-            return Ok(exists);
+            return Ok(new { exists = exists });
         }
-
-        // [HttpGet]
-        // [Route("index")]
-        // public async Task<ActionResult> index() {
-        // string passwordHash = BCrypt.Net.BCrypt.HashPassword("emre");
-        // bool verified = BCrypt.Net.BCrypt.Verify("emre", passwordHash);
-        // return Ok(verified);
-        // return Ok();
-        // }
 
     }
 }
