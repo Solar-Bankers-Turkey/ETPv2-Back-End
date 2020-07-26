@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -14,7 +13,7 @@ namespace CustomerService.Controllers {
 
     [Route("api/users")]
     [ApiController]
-    public class CustomerController : ControllerBase {
+    public class RegistrationController : ControllerBase {
         private readonly IUserRepository _customerRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
@@ -22,7 +21,7 @@ namespace CustomerService.Controllers {
         public string host = "https://localhost:5001";
         // public string host = "https://www.etp.solarbankers.org";
 
-        public CustomerController(IUserRepository customerRepository, IMapper mapper, IConfiguration config, IEmailSender emailSender) {
+        public RegistrationController(IUserRepository customerRepository, IMapper mapper, IConfiguration config, IEmailSender emailSender) {
             _customerRepository = customerRepository;
             _mapper = mapper;
             _config = config;
@@ -30,7 +29,7 @@ namespace CustomerService.Controllers {
         }
 
         /// <summary>
-        /// register (first step) end-point.
+        /// register (first step of registration) end-point.
         /// </summary>
         /// <remarks>
         /// This is the first part of registration it can create email verification link.
@@ -60,7 +59,8 @@ namespace CustomerService.Controllers {
                 return BadRequest();
             }
             // check already exists later
-            var tempUser = await _customerRepository.GetAny("email", registerObject.email);
+            var result = await _customerRepository.GetAny("email", registerObject.email);
+            var tempUser = result.FirstOrDefault();
             if (tempUser != null) {
                 if (tempUser.verified == true) {
                     // ! redirect to sign in page
@@ -90,9 +90,28 @@ namespace CustomerService.Controllers {
             var Subject = "Verify your account";
             var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/users/verify?id={id}'>Verify My Account</a></b>";
             _emailSender.Send(To, Subject, Body);
-            return Ok();
+            return Created("", user);
         }
 
+        /// <summary>
+        /// verify (last step of registration) end-point.
+        /// </summary>
+        /// <remarks>
+        /// This is the last part of registration.
+        ///</remarks>
+        /// <returns>nothing</returns>
+        /// <response code="200">
+        /// 
+        /// Outcomes:
+        ///
+        ///     if email does not exists in database it sends a verification email to the client,
+        /// 
+        ///     if email exists but not verified its sends a message and a link of verification,
+        /// 
+        ///     if email address is exists and verified redirects user to login screen
+        /// 
+        /// </response>
+        /// <response code="400">if registration body is not valid</response>
         [HttpPost]
         [Route("verify")]
         [ProducesResponseType(400)]
@@ -101,17 +120,15 @@ namespace CustomerService.Controllers {
         public async Task<IActionResult> verify([FromBody] Verify verifyObject) {
             var query = HttpContext.Request.Query;
             if (query.Count != 1) {
-                Console.WriteLine(1);
                 return BadRequest();
             }
             var kv = query.Where(a => a.Key == "id").FirstOrDefault();
             if (kv.Value == "") {
-                Console.WriteLine(2);
                 return BadRequest();
             }
-            var user = await _customerRepository.GetAny("id", kv.Value);
+            var result = await _customerRepository.GetAny("id", kv.Value);
+            var user = result.FirstOrDefault();
             if (user == null) {
-                Console.WriteLine(3);
                 return BadRequest();
             }
             if (user.verified) {
@@ -135,124 +152,5 @@ namespace CustomerService.Controllers {
             }
             return Created("", user);
         }
-
-        /// <summary>
-        /// general user query end-point.
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// /get{query}
-        /// 
-        /// {query}  value can be null.
-        /// 
-        /// if request passed with null {query} string it will return all users in data base
-        /// 
-        /// this for development and debugging purpose.
-        /// 
-        /// Sample request:
-        /// 
-        ///     host:port/api/users/get?name=emre
-        ///     host:port/api/users/get?email=emreocak@solarbankers.org
-        ///
-        /// </remarks>
-        /// <returns>users array</returns>
-        /// <response code="200">Returns the result of query as users model array format</response>
-        /// <response code="400">if query is not valid</response>
-        [HttpGet]
-        [Route("get")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(200)]
-        [Produces("application/json")]
-        public async Task<ActionResult<IEnumerable<User>>> get() {
-            var query = HttpContext.Request.Query;
-            if (query.Count == 0) {
-                var customers = await _customerRepository.Get();
-                return Ok(customers);
-            }
-            try {
-                // ! nested query and object query
-                var result = await _customerRepository.Query(query);
-                if (result == null) {
-                    return NoContent();
-                }
-                return Ok(result);
-            } catch {
-                return NoContent();
-            }
-        }
-
-        [HttpGet]
-        [Route("get/id/{id}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<User>> getWithId(string id) {
-            var result = await _customerRepository.GetAny("id", id);
-            return Ok(result);
-        }
-
-        [HttpGet]
-        [Route("get/email/{email}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200)]
-        [Produces("application/json")]
-        public async Task<ActionResult<User>> getWithEmail(string email) {
-            var result = await _customerRepository.GetAny("email", email);
-            return Ok(result);
-        }
-
-        [HttpDelete]
-        [Route("delete/id/{id}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200)]
-        [Produces("application/json")]
-        public async Task<ActionResult<User>> deleteWithId(string id) {
-            var result = await _customerRepository.GetAny("id", id);
-            try {
-                _customerRepository.Delete(id);
-            } catch (System.Exception) {
-                return StatusCode(500);
-            }
-            return Ok(result);
-        }
-
-        [HttpDelete]
-        [Route("delete/email/{email}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200)]
-        [Produces("application/json")]
-        public async Task<ActionResult<User>> deleteWithEmail(string email) {
-            var result = await _customerRepository.GetAny("email", email);
-            if (result == null) {
-                return StatusCode(304);
-            }
-            var id = Utils.RepositoryUtils.getVal(result, "Id");
-            try {
-                _customerRepository.Delete(id);
-            } catch {
-                return StatusCode(500);
-            }
-            return Ok(result);
-        }
-
-        [HttpGet]
-        [Route("exists")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200)]
-        [Produces("application/json")]
-        public async Task<ActionResult<bool>> exists() {
-            var query = HttpContext.Request.Query;
-            if (query.Count == 0) {
-                return Ok(new { exists = false });
-            }
-            var result = await _customerRepository.Query(query);
-            var exists = result != null;
-            return Ok(new { exists = exists });
-        }
-
     }
 }
