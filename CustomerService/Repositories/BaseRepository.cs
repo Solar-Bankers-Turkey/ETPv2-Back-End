@@ -53,28 +53,24 @@ namespace CustomerService.Repositories {
             return ent;
         }
 
-        public async Task<TEntity> GetAny(string key, string value) {
+        public async Task<IEnumerable<TEntity>> GetAny(string key, string value) {
             if (key == "id") {
                 var objectId = new ObjectId(value);
-                return await _dbCollection.FindAsync(Builders<TEntity>.Filter.Eq("_id", objectId)).Result.FirstOrDefaultAsync();
+                return await _dbCollection.FindAsync(Builders<TEntity>.Filter.Eq("_id", objectId)).Result.ToListAsync();
             }
             var builder = Builders<TEntity>.Filter;
             var filter = builder.Eq(key, value);
-            var ent = await _dbCollection.FindAsync(filter).Result.FirstOrDefaultAsync();
+            var ent = await _dbCollection.FindAsync(filter).Result.ToListAsync();
             return ent;
         }
 
-        public async Task<IEnumerable<TEntity>> Get() {
+        public async Task<IEnumerable<TEntity>> GetAll() {
             var all = await _dbCollection.FindAsync(Builders<TEntity>.Filter.Empty);
             return await all.ToListAsync();
         }
 
         public async void Update(TEntity obj) {
-            try {
-                await _dbCollection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", obj.GetType().GetProperty("Id").GetValue(obj, null)), obj);
-            } catch {
-                throw;
-            }
+            await _dbCollection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", obj.GetType().GetProperty("Id").GetValue(obj, null)), obj);
         }
 
     }

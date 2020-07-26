@@ -8,9 +8,8 @@ namespace CustomerService.Repositories {
         Task<string> Create(TEntity obj);
         void Update(TEntity obj);
         void Delete(string id);
-        public Task<IEnumerable<TEntity>> Query(IQueryCollection query);
-        public Task<TEntity> GetAny(string key, string value);
-        // Task<List<TEntity>> Get(FilterDefinition<TEntity> filter);
-        Task<IEnumerable<TEntity>> Get();
+        Task<IEnumerable<TEntity>> Query(IQueryCollection query);
+        Task<IEnumerable<TEntity>> GetAny(string key, string value);
+        Task<IEnumerable<TEntity>> GetAll();
     }
 }
