@@ -35,9 +35,9 @@ namespace CustomerService.Controllers {
         /// 
         /// {query}  value can be null.
         /// 
-        /// if request passed with null {query} string it will return all users in data base
+        /// if request passed with null {query} string it will return all users in database
         /// 
-        /// this for development and debugging purpose.
+        /// this is for development and debugging purpose.
         /// 
         /// Sample request:
         /// 
