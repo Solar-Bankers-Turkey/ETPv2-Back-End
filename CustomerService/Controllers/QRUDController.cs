@@ -78,7 +78,7 @@ namespace CustomerService.Controllers {
                 var userOut = _mapper.Map<UserGeneralOut>(user);
                 // creating and adding id field as string.
                 var id = Utils.RepositoryUtils.getVal(user, "Id");
-                userOut.id = id;
+                userOut.idString = id;
                 customersOut.Add(userOut);
             }
             return Ok(customersOut);
@@ -90,21 +90,12 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(200)]
         [Produces("application/json")]
         public async Task<ActionResult<UserGeneralOut>> update([FromBody] UserGeneralIn modifiedUser) {
-            var result = await _customerRepository.GetAny("id", modifiedUser.id);
+            var result = await _customerRepository.GetAny("id", modifiedUser.idString);
             var user = result.FirstOrDefault();
             if (user == null) {
                 return BadRequest();
             }
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            foreach (PropertyInfo prop in typeof(UserGeneralIn).GetProperties()) {
-                // is user class has same key with UserGeneralIn class?
-                if (typeof(User).GetProperty(prop.Name) != null) {
-                    // the field is empty or not?
-                    if (prop.GetValue(modifiedUser, null) != null) {
-                        user.GetType().GetProperty(prop.Name).SetValue(user, prop.GetValue(modifiedUser, null));
-                    }
-                }
-            }
+            _mapper.Map(modifiedUser, user);
             if (modifiedUser.password != null) {
                 var salt = _config.GetValue<string>("salt");
                 user.passwordHash = BCrypt.Net.BCrypt.HashPassword(salt + modifiedUser.password);

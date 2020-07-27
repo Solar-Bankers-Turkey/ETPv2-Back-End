@@ -6,8 +6,8 @@ namespace CustomerService.DataTransferObjects {
     public class UserGeneralIn {
 
         [BsonRequired]
-        [BsonElement("id")]
-        public string id { get; set; }
+        [BsonElement("idString")]
+        public string idString { get; set; }
 
         [BsonElement("password")]
         public string password { get; set; }

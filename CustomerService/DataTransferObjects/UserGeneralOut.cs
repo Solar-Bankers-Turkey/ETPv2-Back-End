@@ -1,11 +1,12 @@
 using CustomerService.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace CustomerService.DataTransferObjects {
     public class UserGeneralOut {
 
-        [BsonElement("id")]
-        public string id { get; set; }
+        [BsonElement("idString")]
+        public string idString { get; set; }
 
         [BsonElement("name")]
         public string name { get; set; }
