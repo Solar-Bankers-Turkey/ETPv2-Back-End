@@ -42,7 +42,6 @@ namespace CustomerService.Repositories {
             FilterDefinition<TEntity> filter = Builders<TEntity>.Filter.Empty;
             int count = 0;
             foreach (var item in query) {
-                Console.WriteLine($"key:{item.Key}, value:{item.Value}");
                 if (count == 0) {
                     filter = builder.Eq(item.Key, item.Value);
                 } else {
