@@ -16,9 +16,11 @@ namespace CustomerService.Profiles {
                 opt.Condition((src, dest, sourceMember) => sourceMember != null);
             });
 
-            CreateMap<User, UserGeneralOut>().ForAllMembers(opt => {
-                opt.Condition((src, dest, sourceMember) => sourceMember != null);
-            });
+            CreateMap<User, UserGeneralOut>()
+                .ForMember(x => x.idString, opt => opt.MapFrom(o => Utils.RepositoryUtils.getVal(o, "Id")))
+                .ForAllMembers(opt => {
+                    opt.Condition((src, dest, sourceMember) => sourceMember != null);
+                });
 
             CreateMap<UserGeneralOut, User>().ForAllMembers(opt => {
                 opt.Condition((src, dest, sourceMember) => sourceMember != null);
