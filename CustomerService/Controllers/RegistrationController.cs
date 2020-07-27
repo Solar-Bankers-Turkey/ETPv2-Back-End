@@ -6,6 +6,7 @@ using CustomerService.DataTransferObjects;
 using CustomerService.Email;
 using CustomerService.Models;
 using CustomerService.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -16,20 +17,18 @@ namespace CustomerService.Controllers {
     public class RegistrationController : ControllerBase {
         private readonly IUserRepository _customerRepository;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _config;
-        private IEmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
         public string host = "https://localhost:5001";
         // public string host = "https://www.etp.solarbankers.org";
 
-        public RegistrationController(IUserRepository customerRepository, IMapper mapper, IConfiguration config, IEmailSender emailSender) {
+        public RegistrationController(IUserRepository customerRepository, IMapper mapper, IEmailSender emailSender) {
             _customerRepository = customerRepository;
             _mapper = mapper;
-            _config = config;
             _emailSender = emailSender;
         }
 
         /// <summary>
-        /// register (first step of registration) end-point.
+        /// register (first step of registration).
         /// </summary>
         /// <remarks>
         /// This is the first part of registration it can create email verification link.
@@ -71,11 +70,12 @@ namespace CustomerService.Controllers {
                     return Ok(new { error = "This email address already exists please verify your email", Link = $"{host}/api/users/verify?id={tempID}" });
                 }
             }
-            var salt = _config.GetValue<string>("salt");
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(salt + registerObject.password);
+            var salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerObject.password, salt);
             User user = _mapper.Map<User>(registerObject);
             // ! generate persons wallet
             user.passwordHash = passwordHash;
+            // user.passwordSalt = salt;
             // mark as not verified.
             user.verified = false;
             string id;
@@ -94,7 +94,7 @@ namespace CustomerService.Controllers {
         }
 
         /// <summary>
-        /// verify (last step of registration) end-point.
+        /// verify (last step of registration).
         /// </summary>
         /// <remarks>
         /// This is the last part of registration.
