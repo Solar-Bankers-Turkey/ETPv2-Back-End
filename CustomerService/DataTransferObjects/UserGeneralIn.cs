@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CustomerService.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -5,6 +6,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace CustomerService.DataTransferObjects {
     public class UserGeneralIn {
 
+        [Required]
         [BsonRequired]
         [BsonElement("idString")]
         public string idString { get; set; }
