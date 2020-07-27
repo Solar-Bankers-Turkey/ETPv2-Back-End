@@ -53,12 +53,6 @@ namespace CustomerService {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API");
             });
 
-            if (env.IsDevelopment()) {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseAuthorization();

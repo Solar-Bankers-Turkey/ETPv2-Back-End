@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using MimeKit;
+﻿using System.Net;
+using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
 
 namespace CustomerService.Email {
     public class EmailSender : IEmailSender {
@@ -23,26 +24,28 @@ namespace CustomerService.Email {
             _enableSsl = bool.Parse(configuration["Email:EnableSsl"]);
             _useDefaultCredentials = bool.Parse(configuration["Email:UseDefaultCredentials"]);
         }
-        public async void Send(string toAddress, string subject, string body, bool sendAsync = true) {
-            var mimeMessage = new MimeMessage();
-            mimeMessage.From.Add(new MailboxAddress(_fromAddressTitle, _fromAddress));
-            mimeMessage.To.Add(MailboxAddress.Parse(toAddress));
-            mimeMessage.Subject = subject;
-            var bodyBuilder = new MimeKit.BodyBuilder {
-                HtmlBody = body
-            };
 
-            mimeMessage.Body = bodyBuilder.ToMessageBody();
-            using(var client = new MailKit.Net.Smtp.SmtpClient()) {
-                client.Connect(_smtpServer, _smtpPort, _enableSsl);
-                client.Authenticate(_username, _password);
-                if (sendAsync) {
-                    await client.SendAsync(mimeMessage);
-                } else {
-                    client.Send(mimeMessage);
-                }
-                client.Disconnect(true);
-            }
+        public async void Send(string toAddress, string subject, string body, bool sendAsync = true) {
+
+            MailMessage msg = new MailMessage();
+
+            msg.From = new MailAddress(_fromAddress);
+            msg.Sender = new MailAddress(_fromAddress);
+            msg.To.Add(toAddress);
+            msg.Subject = subject;
+            msg.Body = body;
+            msg.IsBodyHtml = true;
+            msg.Priority = MailPriority.High;
+
+            SmtpClient client = new SmtpClient();
+
+            client.EnableSsl = true;
+            client.UseDefaultCredentials = false;
+            client.Host = "smtp.gmail.com";
+            client.Credentials = new NetworkCredential(_username, _password);
+            client.Port = 587;
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.Send(msg);
 
         }
     }
