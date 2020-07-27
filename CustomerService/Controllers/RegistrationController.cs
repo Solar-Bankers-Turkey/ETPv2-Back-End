@@ -18,8 +18,6 @@ namespace CustomerService.Controllers {
         private readonly IUserRepository _customerRepository;
         private readonly IMapper _mapper;
         private readonly IEmailSender _emailSender;
-        public string host = "https://localhost:5001";
-        // public string host = "https://www.etp.solarbankers.org";
 
         public RegistrationController(IUserRepository customerRepository, IMapper mapper, IEmailSender emailSender) {
             _customerRepository = customerRepository;
@@ -57,6 +55,8 @@ namespace CustomerService.Controllers {
             if (Utils.RepositoryUtils.isObjectEmpty<Register>(registerObject) || registerObject == null) {
                 return BadRequest();
             }
+            // host string creation for local: 'https://localhost:5001'
+            string host = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
             // check already exists later
             var result = await _customerRepository.GetAny("email", registerObject.email);
             var tempUser = result.FirstOrDefault();
