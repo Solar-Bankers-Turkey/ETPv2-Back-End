@@ -6,9 +6,7 @@ using CustomerService.DataTransferObjects;
 using CustomerService.Email;
 using CustomerService.Models;
 using CustomerService.Repositories;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace CustomerService.Controllers {
 
@@ -24,8 +22,10 @@ namespace CustomerService.Controllers {
             _mapper = mapper;
             _emailSender = emailSender;
         }
-
-        /// <summary>
+        /// 
+        /// 
+        /// /// 
+        /// /// <summary>
         /// register (first step of registration).
         /// </summary>
         /// <remarks>
@@ -56,7 +56,7 @@ namespace CustomerService.Controllers {
                 return BadRequest();
             }
             // host string creation for local: 'https://localhost:5001'
-            string host = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
+            string host = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}";
             // check already exists later
             var result = await _customerRepository.GetAny("email", registerObject.email);
             var tempUser = result.FirstOrDefault();
@@ -89,8 +89,12 @@ namespace CustomerService.Controllers {
             var To = registerObject.email;
             var Subject = "Verify your account";
             var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/users/verify?id={id}'>Verify My Account</a></b>";
+
             _emailSender.Send(To, Subject, Body);
-            return Created("", user);
+
+            var userOut = _mapper.Map<UserGeneralOut>(user);
+
+            return Created("", userOut);
         }
 
         /// <summary>
@@ -150,7 +154,8 @@ namespace CustomerService.Controllers {
             } catch {
                 return Problem("database update error", "mongodb", 500, "database error", "database");
             }
-            return Created("", user);
+            var userOut = _mapper.Map<UserGeneralOut>(user);
+            return Created("", userOut);
         }
     }
 }

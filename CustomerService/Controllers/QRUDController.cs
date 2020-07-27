@@ -57,8 +57,6 @@ namespace CustomerService.Controllers {
         [Produces("application/json")]
         public async Task<ActionResult<IEnumerable<UserGeneralOut>>> get() {
             var query = HttpContext.Request.Query;
-            var asd = HttpContext.Request.Path;
-            Console.WriteLine(asd);
             IEnumerable<User> customers;
             if (query.Count == 0) {
                 // get all current users
