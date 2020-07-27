@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BCrypt.Net;
+using CustomerService.DataTransferObjects;
 using CustomerService.Email;
 using CustomerService.Models;
 using CustomerService.Repositories;
@@ -13,39 +15,32 @@ namespace CustomerService.Controllers {
     public class LoginController : ControllerBase {
 
         private readonly IUserRepository _customerRepository;
-        // private readonly IMapper _mapper;
+        private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
         public LoginController(IUserRepository customerRepository, IMapper mapper, IConfiguration config) {
             _customerRepository = customerRepository;
-            // _mapper = mapper;
+            _mapper = mapper;
+            _config = config;
         }
 
-        // verify user if has tokens delete if has not generate a token 
-        // with help of this end-point.
-        [HttpGet]
+        /// <summary>
+        /// login control, user exists check
+        /// </summary>
+        /// <returns>boolean 'user exists' value</returns>
+        /// <response code="200">Returns a boolean value that represents user exists or not</response>
+        [HttpPost]
         [Route("login")]
-        [ProducesResponseType(400)]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<ActionResult<User>> login() {
-            var query = HttpContext.Request.Query;
-            if (query.Count != 1) {
-                return BadRequest();
-            }
-            string key = "";
-            string value = "";
-            foreach (var item in query) {
-                key = item.Key;
-                value = item.Value;
-                if (key != "id") {
-                    return BadRequest();
-                }
-            }
-            var user = _customerRepository.GetAny(key, value).Result.FirstOrDefault();
+        public async Task<ActionResult<bool>> login([FromBody] LoginObject loginObject) {
+            var result = await _customerRepository.GetAny("id", loginObject.idString);
+            var user = result.FirstOrDefault();
             if (user == null) {
                 return BadRequest();
             }
-            return Ok(user);
+            var exists = BCrypt.Net.BCrypt.Verify(loginObject.password, user.passwordHash);
+            return Ok(exists);
         }
     }
 }
