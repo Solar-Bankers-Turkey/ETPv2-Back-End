@@ -27,25 +27,24 @@ namespace CustomerService.Email {
 
         public async void Send(string toAddress, string subject, string body, bool sendAsync = true) {
 
-            MailMessage msg = new MailMessage();
-
-            msg.From = new MailAddress(_fromAddress);
-            msg.Sender = new MailAddress(_fromAddress);
-            msg.To.Add(toAddress);
-            msg.Subject = subject;
-            msg.Body = body;
-            msg.IsBodyHtml = true;
-            msg.Priority = MailPriority.High;
-
-            SmtpClient client = new SmtpClient();
-
-            client.EnableSsl = true;
-            client.UseDefaultCredentials = false;
-            client.Host = "smtp.gmail.com";
-            client.Credentials = new NetworkCredential(_username, _password);
-            client.Port = 587;
-            client.DeliveryMethod = SmtpDeliveryMethod.Network;
-            client.Send(msg);
+            using(MailMessage mail = new MailMessage()) {
+                mail.From = new MailAddress(_fromAddress);
+                mail.Sender = new MailAddress(_fromAddress);
+                mail.To.Add(toAddress);
+                mail.Subject = subject;
+                mail.Body = body;
+                mail.IsBodyHtml = true;
+                mail.Priority = MailPriority.High;
+                using(SmtpClient client = new SmtpClient()) {
+                    client.EnableSsl = _enableSsl;
+                    client.UseDefaultCredentials = _useDefaultCredentials;
+                    client.Host = _smtpServer;
+                    client.Credentials = new NetworkCredential(_username, _password);
+                    client.Port = _smtpPort;
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    client.Send(mail);
+                }
+            }
 
         }
     }
