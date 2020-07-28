@@ -22,10 +22,8 @@ namespace CustomerService.Controllers {
             _mapper = mapper;
             _emailSender = emailSender;
         }
-        /// 
-        /// 
-        /// /// 
-        /// /// <summary>
+
+        /// <summary>
         /// register (first step of registration).
         /// </summary>
         /// <remarks>
@@ -73,10 +71,11 @@ namespace CustomerService.Controllers {
             var salt = BCrypt.Net.BCrypt.GenerateSalt();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerObject.password, salt);
             User user = _mapper.Map<User>(registerObject);
+
             // ! generate persons wallet
+            // ! remove dummy wallet id generation
+            user.walletID = BCrypt.Net.BCrypt.HashPassword("dummy wallet").ToString();
             user.passwordHash = passwordHash;
-            // user.passwordSalt = salt;
-            // mark as not verified.
             user.verified = false;
             string id;
             try {
@@ -88,7 +87,7 @@ namespace CustomerService.Controllers {
             // send mail for next step                    
             var To = registerObject.email;
             var Subject = "Verify your account";
-            var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/users/verify?id={id}'>Verify My Account</a></b>";
+            var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/v1/users/verify?id={id}'>Verify My Account</a></b>";
 
             _emailSender.Send(To, Subject, Body);
 
@@ -149,11 +148,10 @@ namespace CustomerService.Controllers {
                 user.detail.language = "TR";
             }
             user.verified = true;
-            try {
-                _customerRepository.Update(user);
-            } catch {
-                return Problem("database update error", "mongodb", 500, "database error", "database");
-            }
+            user.detail.registrationDate = DateTime.Now;
+
+            _customerRepository.Update(user);
+
             var userOut = _mapper.Map<UserGeneralOut>(user);
             return Created("", userOut);
         }

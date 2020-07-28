@@ -26,6 +26,9 @@ namespace CustomerService.DataTransferObjects {
         [BsonElement("birthDate")]
         public DateTime birthDate { get; set; }
 
+        [BsonElement("registrationDate")]
+        public DateTime registrationDate { get; set; }
+
         [BsonElement("region")]
         public string region { get; set; }
 
