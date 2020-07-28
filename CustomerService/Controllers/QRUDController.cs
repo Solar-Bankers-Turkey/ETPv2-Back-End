@@ -63,9 +63,11 @@ namespace CustomerService.Controllers {
                 if (customers == null) {
                     return NoContent();
                 }
+                // ! not returns user as out object for debuging 
                 // Users to UserGeneralOut list convertion.
-                var allCustomersOut = _mapper.Map<UserGeneralOut[]>(customers);
-                return Ok(allCustomersOut);
+                // var allCustomersOut = _mapper.Map<UserGeneralOut[]>(customers);
+                // return Ok(allCustomersOut);
+                return Ok(customers);
             }
             try {
                 // execute the query and get results.
