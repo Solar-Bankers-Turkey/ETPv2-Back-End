@@ -13,5 +13,8 @@ namespace CustomerService.DataTransferObjects {
         [BsonRequired]
         [BsonElement("password")]
         public string password { get; set; }
+
+        [BsonElement("rememberMe")]
+        public bool rememberMe { get; set; }
     }
 }

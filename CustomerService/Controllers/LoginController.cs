@@ -37,7 +37,7 @@ namespace CustomerService.Controllers {
                 return BadRequest();
             }
             var exists = BCrypt.Net.BCrypt.Verify(loginObject.password, user.passwordHash);
-            return Ok(exists);
+            return Ok(new { rememberMe = loginObject.rememberMe });
         }
     }
 }
