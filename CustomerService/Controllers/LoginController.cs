@@ -1,16 +1,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using BCrypt.Net;
 using CustomerService.DataTransferObjects;
-using CustomerService.Email;
-using CustomerService.Models;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace CustomerService.Controllers {
-    [Route("api/users")]
+    [Route("api/v1/users")]
     [ApiController]
     public class LoginController : ControllerBase {
 

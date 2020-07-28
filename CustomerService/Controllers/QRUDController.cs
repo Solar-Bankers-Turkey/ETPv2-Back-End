@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper;
 using CustomerService.DataTransferObjects;
@@ -12,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CustomerService.Controllers {
 
-    [Route("api/users")]
+    [Route("api/v1/users")]
     [ApiController]
     public class QRUDController : ControllerBase {
         private readonly IUserRepository _customerRepository;

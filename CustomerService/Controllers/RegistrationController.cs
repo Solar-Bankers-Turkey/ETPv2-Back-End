@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerService.Controllers {
 
-    [Route("api/users")]
+    [Route("api/v1/users")]
     [ApiController]
     public class RegistrationController : ControllerBase {
         private readonly IUserRepository _customerRepository;
