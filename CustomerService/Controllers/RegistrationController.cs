@@ -5,7 +5,6 @@ using AutoMapper;
 using CustomerService.DataTransferObjects.General;
 using CustomerService.DataTransferObjects.Registration;
 using CustomerService.DataTransferObjects.Verify;
-using CustomerService.Email;
 using CustomerService.Models;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +16,10 @@ namespace CustomerService.Controllers {
     public class RegistrationController : ControllerBase {
         private readonly IUserRepository _customerRepository;
         private readonly IMapper _mapper;
-        private readonly IEmailSender _emailSender;
 
-        public RegistrationController(IUserRepository customerRepository, IMapper mapper, IEmailSender emailSender) {
+        public RegistrationController(IUserRepository customerRepository, IMapper mapper) {
             _customerRepository = customerRepository;
             _mapper = mapper;
-            _emailSender = emailSender;
         }
 
         /// <summary>

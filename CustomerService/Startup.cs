@@ -3,13 +3,11 @@ using System.IO;
 using System.Reflection;
 using AutoMapper;
 using CustomerService.Contexts;
-using CustomerService.Email;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 namespace CustomerService {
@@ -29,7 +27,6 @@ namespace CustomerService {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IMongoUserDBContext, MongoUserDBContext>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IEmailSender, EmailSender>();
             services.AddControllers();
             // swagger for api gen.
             // services.AddSwaggerGen();
