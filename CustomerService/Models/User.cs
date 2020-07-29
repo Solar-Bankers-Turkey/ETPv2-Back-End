@@ -24,7 +24,7 @@ namespace CustomerService.Models {
         [BsonElement("email")]
         public string email { get; set; }
 
-        // [Required]
+        [Required]
         [BsonElement("walletID")]
         public string walletID { get; set; }
 
@@ -33,11 +33,19 @@ namespace CustomerService.Models {
         public string customerType { get; set; }
 
         [Required]
+        [BsonElement("role")]
+        public string role { get; set; }
+
+        [Required]
         [BsonElement("verified")]
         public bool verified { get; set; }
 
         [Required]
-        [BsonElement("detail")]
-        public Detail detail { get; set; }
+        [BsonElement("info")]
+        public Info info { get; set; }
+
+        [Required]
+        [BsonElement("settings")]
+        public Settings settings { get; set; }
     }
 }

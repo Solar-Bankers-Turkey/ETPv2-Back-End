@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using CustomerService.DataTransferObjects;
+using CustomerService.DataTransferObjects.General;
+using CustomerService.DataTransferObjects.Registration;
+using CustomerService.DataTransferObjects.Verify;
 using CustomerService.Email;
 using CustomerService.Models;
 using CustomerService.Repositories;
@@ -48,9 +50,9 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<ActionResult> register([FromBody] Register registerObject) {
+        public async Task<ActionResult<RegisterOut>> register([FromBody] RegisterIn registerObject) {
             // check null object
-            if (Utils.RepositoryUtils.isObjectEmpty<Register>(registerObject) || registerObject == null) {
+            if (Utils.RepositoryUtils.isObjectEmpty<RegisterIn>(registerObject) || registerObject == null) {
                 return BadRequest();
             }
             // host string creation for local: 'https://localhost:5001'
@@ -84,14 +86,14 @@ namespace CustomerService.Controllers {
                 // status code not modified
                 return StatusCode(304);
             }
-            // send mail for next step                    
-            var To = registerObject.email;
-            var Subject = "Verify your account";
-            var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/v1/users/verify?id={id}'>Verify My Account</a></b>";
+            // // send mail for next step                    
+            // var To = registerObject.email;
+            // var Subject = "Verify your account";
+            // var Body = $"Please verify your email address by clicking here to move on to the next step in your energy trading platform membership. {Environment.NewLine} <br /><b><a href='{host}/api/v1/users/verify?id={id}'>Verify My Account</a></b>";
 
-            _emailSender.Send(To, Subject, Body);
+            // _emailSender.Send(To, Subject, Body);
 
-            var userOut = _mapper.Map<UserGeneralOut>(user);
+            var userOut = _mapper.Map<RegisterOut>(user);
 
             return Created("", userOut);
         }
@@ -120,7 +122,7 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<IActionResult> verify([FromBody] Verify verifyObject) {
+        public async Task<IActionResult> verify([FromBody] VerifyIn verifyObject) {
             var query = HttpContext.Request.Query;
             if (query.Count != 1) {
                 return BadRequest();
@@ -139,20 +141,16 @@ namespace CustomerService.Controllers {
             }
             // ! add real customerType
             user.customerType = "consumer";
-            Detail detail = _mapper.Map<Detail>(verifyObject);
-            user.detail = detail;
-            if (verifyObject.region == null) {
-                user.detail.region = "Turkey";
-            }
-            if (verifyObject.language == null) {
-                user.detail.language = "TR";
-            }
+            user.info = verifyObject.info;
+            user.info.registrationDate = DateTime.Now;
             user.verified = true;
-            user.detail.registrationDate = DateTime.Now;
+            user.role = "standart";
+
+            user.settings = _mapper.Map(verifyObject.settings, user.settings);
 
             _customerRepository.Update(user);
 
-            var userOut = _mapper.Map<UserGeneralOut>(user);
+            var userOut = _mapper.Map<GeneralOut>(user);
             return Created("", userOut);
         }
     }

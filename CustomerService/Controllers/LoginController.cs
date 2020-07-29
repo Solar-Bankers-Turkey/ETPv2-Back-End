@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using CustomerService.DataTransferObjects;
+using CustomerService.DataTransferObjects.Login;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -30,14 +30,14 @@ namespace CustomerService.Controllers {
         [Route("login")]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<ActionResult<bool>> login([FromBody] LoginObject loginObject) {
-            var result = await _customerRepository.GetAny("id", loginObject.idString);
+        public async Task<ActionResult<bool>> login([FromBody] LoginIn loginObject) {
+            var result = await _customerRepository.GetAny("email", loginObject.email);
             var user = result.FirstOrDefault();
             if (user == null) {
                 return BadRequest();
             }
             var exists = BCrypt.Net.BCrypt.Verify(loginObject.password, user.passwordHash);
-            return Ok(new { rememberMe = loginObject.rememberMe });
+            return Ok(exists);
         }
     }
 }

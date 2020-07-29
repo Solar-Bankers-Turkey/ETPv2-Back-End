@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace CustomerService.DataTransferObjects {
-    public class Register {
+namespace CustomerService.DataTransferObjects.Registration {
+    public class RegisterIn {
+
         [Required]
         [BsonRequired]
         [BsonElement("name")]

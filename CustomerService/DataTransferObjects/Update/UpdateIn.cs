@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using CustomerService.Models;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace CustomerService.DataTransferObjects {
-    public class UserGeneralIn {
+namespace CustomerService.DataTransferObjects.Update {
+
+    public class UpdateIn {
 
         [Required]
         [BsonRequired]
@@ -26,10 +26,13 @@ namespace CustomerService.DataTransferObjects {
         [BsonElement("walletID")]
         public string walletID { get; set; }
 
-        [BsonElement("customerType")]
-        public string customerType { get; set; }
+        [BsonElement("role")]
+        public string role { get; set; }
 
-        [BsonElement("detail")]
-        public Detail detail { get; set; }
+        [BsonElement("info")]
+        public UpdateInfo info { get; set; }
+
+        [BsonElement("settings")]
+        public Settings settings { get; set; }
     }
 }

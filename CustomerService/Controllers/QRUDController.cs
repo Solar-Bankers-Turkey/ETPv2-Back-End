@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CustomerService.DataTransferObjects;
+using CustomerService.DataTransferObjects.General;
+using CustomerService.DataTransferObjects.Update;
 using CustomerService.Models;
 using CustomerService.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +55,7 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(200)]
         [ProducesResponseType(204)]
         [Produces("application/json")]
-        public async Task<ActionResult<IEnumerable<UserGeneralOut>>> get() {
+        public async Task<ActionResult<IEnumerable<GeneralOut>>> get() {
             var query = HttpContext.Request.Query;
             IEnumerable<User> customers;
             if (query.Count == 0) {
@@ -64,8 +66,8 @@ namespace CustomerService.Controllers {
                     return NoContent();
                 }
                 // ! not returns user as out object for debuging 
-                // Users to UserGeneralOut list convertion.
-                // var allCustomersOut = _mapper.Map<UserGeneralOut[]>(customers);
+                // Users to GeneralOut list convertion.
+                // var allCustomersOut = _mapper.Map<GeneralOut[]>(customers);
                 // return Ok(allCustomersOut);
                 return Ok(customers);
             }
@@ -78,8 +80,8 @@ namespace CustomerService.Controllers {
             if (customers == null) {
                 return NoContent();
             }
-            // Users to UserGeneralOut list convertion.
-            var customersOut = _mapper.Map<UserGeneralOut[]>(customers);
+            // Users to GeneralOut list convertion.
+            var customersOut = _mapper.Map<GeneralOut[]>(customers);
             return Ok(customersOut);
         }
 
@@ -97,11 +99,11 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<ActionResult<UserGeneralOut>> update([FromBody] UserGeneralIn modifiedUser) {
+        public async Task<ActionResult<GeneralOut>> update([FromBody] UpdateIn modifiedUser) {
             var result = await _customerRepository.GetAny("id", modifiedUser.idString);
             var user = result.FirstOrDefault();
             if (user == null) {
-                return BadRequest();
+                return BadRequest(new { error = "user not found" });
             }
             _mapper.Map(modifiedUser, user);
             if (modifiedUser.password != null) {
@@ -109,7 +111,7 @@ namespace CustomerService.Controllers {
                 user.passwordHash = BCrypt.Net.BCrypt.HashPassword(salt + modifiedUser.password);
             }
             _customerRepository.Update(user);
-            var userOut = _mapper.Map<UserGeneralOut>(user);
+            var userOut = _mapper.Map<GeneralOut>(user);
             userOut.idString = modifiedUser.idString;
             return Ok(userOut);
         }
@@ -128,7 +130,7 @@ namespace CustomerService.Controllers {
         [ProducesResponseType(400)]
         [ProducesResponseType(200)]
         [Produces("application/json")]
-        public async Task<ActionResult<IEnumerable<UserGeneralOut>>> delete() {
+        public async Task<ActionResult<IEnumerable<GeneralOut>>> delete() {
             var query = HttpContext.Request.Query;
             if (query.Count == 0) {
                 return BadRequest();
@@ -138,8 +140,8 @@ namespace CustomerService.Controllers {
                 var id = Utils.RepositoryUtils.getVal(user, "Id");
                 _customerRepository.Delete(id);
             }
-            // Users to UserGeneralOut list convertion.
-            var customersOut = _mapper.Map<UserGeneralOut[]>(customers);
+            // Users to GeneralOut list convertion.
+            var customersOut = _mapper.Map<GeneralOut[]>(customers);
             return Ok(customersOut);
         }
 
