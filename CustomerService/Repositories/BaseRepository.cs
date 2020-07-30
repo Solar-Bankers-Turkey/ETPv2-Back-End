@@ -11,13 +11,10 @@ namespace CustomerService.Repositories {
 
     public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class {
 
-        private readonly IMongoUserDBContext _mongoContext;
         protected IMongoCollection<TEntity> _dbCollection;
-        private IMongoUserDBContext context;
 
-        protected BaseRepository(IMongoUserDBContext context) {
-            _mongoContext = context;
-            _dbCollection = _mongoContext.GetCollection<TEntity>(typeof(TEntity).Name.ToLower());
+        protected BaseRepository(IMongoUserDBContext mongoContext) {
+            _dbCollection = mongoContext.GetCollection<TEntity>(typeof(TEntity).Name.ToLower());
         }
 
         public async Task<string> Create(TEntity obj) {
