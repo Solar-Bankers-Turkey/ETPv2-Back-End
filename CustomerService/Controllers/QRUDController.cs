@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using CustomerService.DataTransferObjects;
 using CustomerService.DataTransferObjects.General;
 using CustomerService.DataTransferObjects.Update;
 using CustomerService.Models;
